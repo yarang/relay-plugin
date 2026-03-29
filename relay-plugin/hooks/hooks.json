@@ -1,0 +1,34 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "세션 시작 시 다음을 순서대로 확인하고 실행합니다.\n\n## 1. relay 설정 확인\n\n`.claude/relay/domain-config.json` 을 확인합니다.\n\n- **없음**: relay가 초기화되지 않은 프로젝트입니다.\n  ```\n  💡 relay 플러그인이 설치되어 있습니다.\n     /relay:setup 으로 팀 환경을 초기화하세요.\n  ```\n  이후 단계를 건너뜁니다.\n\n- **있음**: domain, active_packs, project_name 을 읽습니다.\n\n## 2. 팀 존재 여부 확인\n\n`.claude/relay/teams/` 디렉토리가 비어 있으면:\n```\n💡 전문가와 팀이 아직 정의되지 않았습니다.\n   /relay:define-expert → /relay:build-team 순서로 시작하세요.\n```\n이후 단계를 건너뜁니다.\n\n## 3. 회의록 자동 시작\n\n`.claude/relay/meetings/ACTIVE.json` 을 확인합니다.\n\n### Case A — ACTIVE.json 존재 (이전 세션 미완료)\n이전 세션이 비정상 종료된 경우입니다.\n- transcript.md 에 `[세션 재개 {현재 시각}]` 추가\n- 사용자에게 알림:\n  ```\n  🔴 이전 회의가 재개되었습니다.\n  회의 ID: {meeting_id}\n  안건: {agenda}\n  ```\n\n### Case B — ACTIVE.json 없음 (정상 신규 세션)\n- 오늘 날짜와 팀 목록으로 meeting_id 생성: `{YYYY-MM-DD}_{팀ID}_001`\n- `.claude/relay/meetings/ACTIVE.json` 생성\n- `.claude/relay/meetings/{meeting_id}_transcript.md` 생성 (헤더 포함)\n- 사용자에게 알림:\n  ```\n  🔴 RECORDING — 회의 대화록이 자동으로 시작되었습니다.\n  파일: .claude/relay/meetings/{meeting_id}_transcript.md\n\n  안건을 설정하려면: /relay:meeting topic {주제}\n  안건을 변경하려면: /relay:meeting new {새 안건}\n  기록을 끄려면:    /relay:meeting off\n  ```\n\n## 4. 미완료 작업 확인 (dev 도메인)\n\nactive_packs 에 dev 가 포함된 경우:\n\n- FINAL DDL 중 PLAN 파일이 없는 것 탐지:\n  ```\n  ⚠️ PLAN 파일이 없는 FINAL DDL:\n    DDL-001: 결제 모듈 분리\n    → 팀 리더가 /relay:dev:create-implementation-plan 을 실행해야 합니다.\n  ```"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "세션 종료 시 다음을 순서대로 실행합니다.\n\n## 1. ACTIVE.json 확인\n\n`.claude/relay/meetings/ACTIVE.json` 이 없으면 모든 단계를 건너뜁니다.\n\n## 2. 마지막 발언 기록\n\n아직 기록되지 않은 마지막 발언이 있으면:\n```\n/relay:meeting log \"{역할명}\" \"{마지막 발언 내용}\"\n```\n\n## 3. 대화록 종료 표시\n\ntranscript.md 마지막에 추가:\n```markdown\n---\n🔴 세션 종료: {종료 시각}\n총 발언 수: {N}건\n---\n```\n\n## 4. 요약본 자동 생성\n\ntranscript.md 전체를 읽고 summary.md 를 생성합니다.\n\n```markdown\n# 회의 요약본\n\n**회의 ID**: {meeting_id}\n**일시**: {시작} ~ {종료}\n**참석자**: {대화록에서 감지된 역할 목록}\n**주제**: {agenda}\n**대화록**: {transcript 파일명} ({총 발언 수}건)\n\n---\n\n## 논의된 안건\n{안건별 핵심 논의 요약}\n\n---\n\n## 결정 사항\n| # | 결정 내용 | 방식 | 담당 |\n|---|---|---|---|\n\n---\n\n## 액션 아이템\n| # | 할 일 | 담당 | 기한 | 연관 스킬 |\n|---|---|---|---|---|\n\n---\n\n## 미결 사항\n- {해결되지 않은 항목}\n\n---\n\n*자동 생성 — meeting-recorder*\n```\n\n## 5. ACTIVE.json 삭제\n\n`.claude/relay/meetings/ACTIVE.json` 을 삭제합니다.\n\n## 6. 완료 알림\n\n```\n✅ 회의가 자동으로 마무리되었습니다.\n대화록: .claude/relay/meetings/{meeting_id}_transcript.md\n요약본: .claude/relay/meetings/{meeting_id}_summary.md\n```"
+          }
+        ]
+      }
+    ],
+    "TeammateIdle": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "유휴 상태에서 재활성화될 때 확인합니다.\n\n`.claude/relay/meetings/ACTIVE.json` 이 존재하면:\n- 마지막으로 한 발언이 아직 기록되지 않았으면 `/relay:meeting log` 로 추가합니다.\n- 회의가 오래 중단되었으면 `/relay:meeting status` 로 현재 상태를 확인합니다."
+          }
+        ]
+      }
+    ]
+  }
+}

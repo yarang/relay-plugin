@@ -1,0 +1,40 @@
+# Git ignore
+
+# relay-plugin
+.cclaude-plugin/
+.cclaude/relay/
+agent-library/
+*.DS_Store
+*.pyc
+__pycache__/
+.ruff_cache/
+
+# MCP servers - API keys (credentials)
+mcp-servers/**/credentials.json
+.mcp.json
+.env
+*.env.local
+
+# IDE
+.idea
+.vscode/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Logs
+*.log
+logs/
+
+# Runtime data
+*.pid
+*.pyc
+
+# Secrets ( credentials files
+*_credentials.json
+*.pem
+*.env
+.env.local
+.agent_forge_for_zai.json
