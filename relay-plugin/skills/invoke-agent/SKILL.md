@@ -19,6 +19,57 @@
 
 정의 파일이 없으면 [docs/agent-definition-and-invocation.md](/Users/yarang/working/agent_teams/relay-plugin/docs/agent-definition-and-invocation.md) 형식에 맞춰 먼저 생성하도록 안내합니다.
 
+## 실행 모드
+
+`gemini:*` 와 `codex:*` 백엔드는 세 가지 실행 모드를 모두 지원합니다.
+모드를 명시하지 않으면 **in-process** 가 기본값입니다.
+
+| 모드 | 파라미터 | MCP 호출 주체 | 페르소나 합성 주체 | 적합한 상황 |
+|---|---|---|---|---|
+| **in-process** (기본) | `mode: inprocess` 또는 생략 | invoke-agent (현재 세션) | invoke-agent | 단순·순차 작업, 빠른 실행 |
+| **teammate** | `mode: teammate` | teammate Claude | teammate 자체 | 병렬 작업, 상태 유지, 긴 대화 |
+| **subagent** | `mode: subagent` | subagent Claude | subagent 자체 | 격리 실행, 독립적 컨텍스트 |
+
+### 모드별 동작 비교
+
+```
+in-process:
+  invoke-agent → expert 파일 읽기 → 페르소나 합성
+              → gemini_mcp / codex_mcp 직접 호출
+              → 결과 수신 → runs/ 기록
+
+teammate:
+  invoke-agent → developer-gemini.md 또는 developer-openai.md 로 teammate 실행
+  teammate     → expert 파일 읽기 → 페르소나 합성 (자체)
+              → gemini_mcp / codex_mcp 호출 (자체)
+              → /relay:progress-sync 보고
+
+subagent:
+  invoke-agent → subagent 스폰 (claude --print)
+  subagent     → .mcp.json 에서 MCP 도구 자동 로드
+              → gemini_mcp / codex_mcp 호출 (자체)
+              → 결과 반환 후 종료
+```
+
+### Zai 와의 차이
+
+```
+zai teammate → ANTHROPIC_BASE_URL 교체 → 모델 자체가 GLM 으로 전환
+               (Claude API 호출이 모두 GLM 으로 라우팅됨)
+
+gemini/codex teammate → Claude Code 정상 실행
+                       → gemini_mcp / codex_mcp 도구 호출로 외부 위임
+                       (Claude 와 Gemini/OpenAI 가 공존)
+```
+
+### subagent 호환성
+
+subagent 는 프로젝트 루트의 `.mcp.json` 을 상속합니다.
+`gemini_mcp`, `codex_mcp`, `zai_mcp` 모두 subagent 에서 동일하게 사용 가능합니다.
+별도 설정 없이 `mode: subagent` 지정만으로 호환됩니다.
+
+---
+
 ## 입력 해석
 
 사용자 입력에서 다음을 파악합니다.
@@ -27,6 +78,10 @@
   - expert slug 또는 definition id
 - `task`
   - 이번 실행에서 해야 할 일
+- `mode` *(선택, 기본값: inprocess)*
+  - `inprocess` — 현재 세션에서 MCP 직접 호출
+  - `teammate` — Claude teammate 스폰, teammate 가 MCP 호출
+  - `subagent` — claude --print 로 subagent 스폰, subagent 가 MCP 호출
 - `model` *(선택, 런타임 오버라이드)*
   - 지정하면 `backed_by` 의 모델명을 덮어씁니다.
   - 네임스페이스는 `backed_by` 와 동일해야 합니다.
@@ -290,11 +345,11 @@ MCP 호출 전 반드시 확인합니다.
 
 ## 실행 방식
 
-backed_by 네임스페이스별로 다음과 같이 처리합니다.
+backed_by 네임스페이스 × 실행 모드 조합으로 처리합니다.
 
 ### `relay:*`
 
-relay 내부 agent template 를 직접 사용합니다.
+relay 내부 agent template 를 직접 사용합니다. 모드 파라미터 무관.
 
 ```
 relay:developer   → agents/developer.md
@@ -311,60 +366,110 @@ moai:sns-content-creator  → moai 플러그인 에이전트 호출
 moai:contract-reviewer    → moai 플러그인 에이전트 호출
 ```
 
-### `gemini:{model}` — MCP 경유
+### `gemini:{model}` — 모드별 처리
 
-`gemini_mcp` MCP 서버의 `gemini_generate` 도구를 호출합니다.
-**페르소나 합성 섹션**에서 만든 `system` 문자열을 반드시 함께 전달합니다.
+#### mode: inprocess (기본)
 
-```
+현재 세션에서 `gemini_mcp` 를 직접 호출합니다.
+페르소나 합성은 invoke-agent 가 수행합니다.
+
+```python
 gemini_mcp.gemini_generate(
-  model   = "gemini-2.5-flash",   ← backed_by 에서 파싱
-  system  = <페르소나 합성 결과>,  ← 전문가 파일에서 구성
-  context = <이전 결과 요약>,      ← 있을 때만
+  model   = "gemini-2.5-flash",   # backed_by 에서 파싱
+  system  = <페르소나 합성 결과>, # invoke-agent 가 구성
+  context = <이전 결과 요약>,     # 있을 때만
   prompt  = <이번 task 지시문>,
 )
 ```
 
-사전 조건: `gemini_mcp` MCP 서버가 `.mcp.json` 에 등록되어 있어야 합니다.
-등록 방법: `/relay:setup-keys` 실행
+#### mode: teammate
 
-### `codex:{model}` — MCP 경유
+`agents/developer-gemini.md` 를 teammate 로 실행합니다.
+페르소나 합성과 `gemini_mcp` 호출은 **teammate 자체**가 수행합니다.
 
-`codex_mcp` MCP 서버의 `codex_generate` 도구를 호출합니다.
-**페르소나 합성 섹션**에서 만든 `system` 문자열을 반드시 함께 전달합니다.
-
+```bash
+# teammate 실행 (ANTHROPIC_BASE_URL 오버라이드 없음)
+env CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 \
+  claude --teammate-mode tmux --plugin-dir /path/to/relay-plugin
 ```
+
+#### mode: subagent
+
+subagent 를 스폰하고, subagent 가 `gemini_mcp` 를 직접 호출합니다.
+`.mcp.json` 이 프로젝트 루트에 있으면 subagent 에 자동 상속됩니다.
+
+```bash
+claude --print "task: {task}" --mcp-config .mcp.json
+```
+
+사전 조건 (모든 모드): `gemini_mcp` 가 `.mcp.json` 에 등록되어 있어야 합니다.
+등록 방법: `/relay:setup-keys` → `[1] Google Gemini`
+
+---
+
+### `codex:{model}` — 모드별 처리
+
+#### mode: inprocess (기본)
+
+현재 세션에서 `codex_mcp` 를 직접 호출합니다.
+
+```python
 codex_mcp.codex_generate(
-  model   = "gpt-4o",              ← backed_by 에서 파싱
-  system  = <페르소나 합성 결과>,  ← 전문가 파일에서 구성
-  context = <이전 결과 요약>,      ← 있을 때만
+  model   = "gpt-4o",             # backed_by 에서 파싱
+  system  = <페르소나 합성 결과>, # invoke-agent 가 구성
+  context = <이전 결과 요약>,     # 있을 때만
   prompt  = <이번 task 지시문>,
 )
 ```
 
-사전 조건: `codex_mcp` MCP 서버가 `.mcp.json` 에 등록되어 있어야 합니다.
-등록 방법: `/relay:setup-keys` 실행
+#### mode: teammate
 
-### `zai:{model}` — MCP 경유
+`agents/developer-openai.md` 를 teammate 로 실행합니다.
+페르소나 합성과 `codex_mcp` 호출은 **teammate 자체**가 수행합니다.
 
-`zai_mcp` MCP 서버의 `zai_generate` 도구를 호출합니다.
-Zhipu AI (智谱AI) GLM 시리즈를 사용합니다.
-
+```bash
+env CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 \
+  claude --teammate-mode tmux --plugin-dir /path/to/relay-plugin
 ```
+
+#### mode: subagent
+
+subagent 가 `codex_mcp` 를 직접 호출합니다.
+`.mcp.json` 의 `OPENAI_AUTH_TYPE=oauth` 설정도 subagent 에 상속됩니다.
+
+사전 조건 (모든 모드): `codex_mcp` 가 `.mcp.json` 에 등록되어 있어야 합니다.
+등록 방법: `/relay:setup-keys` → `[2] OpenAI / Codex` → API 키 또는 OAuth 선택
+
+---
+
+### `zai:{model}` — MCP 경유 (모든 모드 동일)
+
+Zai 는 teammate 모드에서 `ANTHROPIC_BASE_URL` 교체 방식을 사용합니다.
+in-process / subagent 에서는 `zai_mcp` 도구를 직접 호출합니다.
+
+```python
+# in-process / subagent
 zai_mcp.zai_generate(
-  model   = "glm-4-flash",         ← backed_by 에서 파싱 (무료 티어)
+  model   = "glm-4-flash",        # backed_by 에서 파싱 (무료 티어)
   system  = <페르소나 합성 결과>,
-  context = <이전 결과 요약>,      ← 있을 때만
+  context = <이전 결과 요약>,     # 있을 때만
   prompt  = <이번 task 지시문>,
 )
+```
+
+```bash
+# teammate (ANTHROPIC_BASE_URL 교체 방식 — Zai 전용)
+env ANTHROPIC_BASE_URL=https://api.z.ai/api/anthropic \
+    ANTHROPIC_DEFAULT_SONNET_MODEL=glm-4.7 \
+    claude --teammate-mode tmux
 ```
 
 주요 모델:
 ```
-zai:glm-4-flash    → 무료 티어, 컨텍스트 압축에 권장
+zai:glm-4-flash    → 무료 티어, 컨텍스트 압축 권장
 zai:glm-4-air      → 저비용 범용
 zai:glm-4          → 고성능
-zai:glm-4-long     → 128K 컨텍스트
+zai:glm-4-long     → 1M 컨텍스트
 ```
 
 사전 조건: `zai_mcp` MCP 서버가 `.mcp.json` 에 등록되어 있어야 합니다.

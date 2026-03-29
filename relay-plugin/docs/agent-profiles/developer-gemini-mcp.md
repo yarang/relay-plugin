@@ -1,6 +1,6 @@
 ---
 profile_id: developer-gemini-mcp
-purpose: invoke-agent MCP 호출 시 참조용 — Claude Code teammate 모드와 무관
+purpose: in-process 모드 전용 참조 프로파일 — teammate 모드는 agents/developer-gemini.md 사용
 backed_by: gemini:gemini-2.5-flash
 default_model: gemini-2.5-flash
 override_models:
@@ -8,11 +8,18 @@ override_models:
   - gemini-2.0-flash
 ---
 
-# developer-gemini (MCP 호출 프로파일)
+# developer-gemini (in-process MCP 호출 프로파일)
 
-> **주의**: 이 파일은 `invoke-agent` 가 `gemini_mcp` 를 통해 외부 LLM 을 호출할 때
-> 참조하는 프로파일입니다. Claude Code teammate 모드 실행 파일(`agents/developer-gemini.md`)
-> 과는 완전히 다른 목적입니다.
+> **실행 모드별 차이**
+>
+> | 모드 | 사용 파일 | MCP 호출 주체 |
+> |---|---|---|
+> | **in-process** (이 파일) | `docs/agent-profiles/developer-gemini-mcp.md` | `invoke-agent` |
+> | **teammate** | `agents/developer-gemini.md` | teammate 자체 |
+> | **subagent** | (별도 파일 없음, `.mcp.json` 상속) | subagent 자체 |
+>
+> 이 파일은 **in-process 모드**에서 `invoke-agent` 가 `gemini_mcp` 를 호출할 때
+> 참조하는 프로파일입니다.
 
 ## 실행 방식
 
