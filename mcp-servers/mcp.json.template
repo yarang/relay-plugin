@@ -4,7 +4,7 @@
       "command": "uv",
       "args": [
         "run",
-        "/Users/yarang/working/agent_teams/mcp-servers/gemini-wrapper/server.py"
+        "{{PROJECT_ROOT}}/mcp-servers/gemini-wrapper/server.py"
       ],
       "env": {
         "GEMINI_API_KEY": "YOUR_GEMINI_API_KEY_HERE"
@@ -16,7 +16,7 @@
       "command": "uv",
       "args": [
         "run",
-        "/Users/yarang/working/agent_teams/mcp-servers/codex-wrapper/server.py"
+        "{{PROJECT_ROOT}}/mcp-servers/codex-wrapper/server.py"
       ],
       "env": {
         "OPENAI_API_KEY": "YOUR_OPENAI_API_KEY_HERE"
@@ -28,7 +28,7 @@
       "command": "uv",
       "args": [
         "run",
-        "/Users/yarang/working/agent_teams/mcp-servers/codex-wrapper/server.py"
+        "{{PROJECT_ROOT}}/mcp-servers/codex-wrapper/server.py"
       ],
       "env": {
         "OPENAI_AUTH_TYPE": "oauth"
@@ -39,11 +39,18 @@
       "command": "uv",
       "args": [
         "run",
-        "/Users/yarang/working/agent_teams/mcp-servers/zai-wrapper/server.py"
+        "{{PROJECT_ROOT}}/mcp-servers/zai-wrapper/server.py"
       ],
       "env": {
         "ZHIPU_API_KEY": "YOUR_ZHIPU_API_KEY_HERE"
       }
     }
+  },
+
+  "_instructions": {
+    "setup": "1. 이 파일을 프로젝트 루트의 .mcp.json 으로 복사하세요",
+    "replace": "2. {{PROJECT_ROOT}} 를 실제 프로젝트 경로로 변경하세요 (예: ~/working/agent_teams)",
+    "api_keys": "3. YOUR_*_API_KEY_HERE 를 실제 API 키로 변경하세요",
+    "relay_setup": "또는 /relay:setup-keys 를 실행하면 자동으로 처리됩니다"
   }
 }

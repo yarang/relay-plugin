@@ -3,6 +3,7 @@
 # relay-plugin
 .cclaude-plugin/
 .cclaude/relay/
+.claude/
 agent-library/
 *.DS_Store
 *.pyc
