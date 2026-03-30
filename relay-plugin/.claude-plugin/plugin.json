@@ -4,5 +4,25 @@
   "description": "Prompt-based hierarchical agent team framework for Claude Code. Define expert personas, build layered teams, and delegate across Claude and external LLMs — no code required.",
   "author": {
     "name": "yarang"
-  }
+  },
+  "keywords": [
+    "team", "agents", "hierarchy", "expert", "multi-agent",
+    "orchestration", "tdd", "ddd", "gemini", "openai", "glm"
+  ],
+  "commands": [
+    "./.claude/commands/setup.md",
+    "./.claude/commands/setup-keys.md",
+    "./.claude/commands/define-expert.md",
+    "./.claude/commands/build-team.md",
+    "./.claude/commands/invoke-agent.md",
+    "./.claude/commands/visualize-team.md",
+    "./.claude/commands/write-design-decision.md",
+    "./.claude/commands/escalate.md",
+    "./.claude/commands/read-context.md",
+    "./.claude/commands/progress-sync.md",
+    "./.claude/commands/meeting.md",
+    "./.claude/commands/dev/tdd-cycle.md",
+    "./.claude/commands/dev/ddd-design.md",
+    "./.claude/commands/dev/create-implementation-plan.md"
+  ]
 }

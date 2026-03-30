@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# relay-plugin installer — project-level setup (no plugin install required)
+# relay-plugin installer — manual install fallback (primary: claude plugin install)
 # Usage: bash <(curl -fsSL https://raw.githubusercontent.com/yarang/relay-plugin/main/install.sh)
 
 set -euo pipefail
@@ -12,7 +12,6 @@ RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
 CYAN='\033[0;36m'; RESET='\033[0m'
 info()    { echo -e "${CYAN}[relay]${RESET} $*"; }
 success() { echo -e "${GREEN}[relay]${RESET} $*"; }
-warn()    { echo -e "${YELLOW}[relay]${RESET} $*"; }
 error()   { echo -e "${RED}[relay] ERROR:${RESET} $*" >&2; exit 1; }
 
 # ── prerequisites ────────────────────────────────────────────────────────────
@@ -38,46 +37,42 @@ PLUGIN_SRC="$RELAY_HOME/relay-plugin"
 info "Installing commands to $COMMANDS_DIR ..."
 mkdir -p "$COMMANDS_DIR/dev"
 
-cp "$PLUGIN_SRC/commands/relay/"*.md "$COMMANDS_DIR/" 2>/dev/null || true
-cp "$PLUGIN_SRC/commands/relay/dev/"*.md "$COMMANDS_DIR/dev/" 2>/dev/null || true
+cp "$PLUGIN_SRC/.claude/commands/"*.md "$COMMANDS_DIR/" 2>/dev/null || true
+cp "$PLUGIN_SRC/.claude/commands/dev/"*.md "$COMMANDS_DIR/dev/" 2>/dev/null || true
 
 # ── 2. agents (.claude/agents/) ──────────────────────────────────────────────
 info "Installing agents to $AGENTS_DIR ..."
 mkdir -p "$AGENTS_DIR"
-cp "$PLUGIN_SRC/agents/"*.md "$AGENTS_DIR/"
+cp "$PLUGIN_SRC/.claude/agents/"*.md "$AGENTS_DIR/"
 
 # ── 3. hooks (.claude/settings.json) ─────────────────────────────────────────
 info "Merging hooks into $SETTINGS_FILE ..."
-HOOKS_SRC="$PLUGIN_SRC/hooks/hooks.json"
+HOOKS_SRC="$PLUGIN_SRC/.claude-plugin/hooks.json"
 
 if [[ ! -f "$SETTINGS_FILE" ]]; then
   mkdir -p "$(dirname "$SETTINGS_FILE")"
-  # Create settings.json with hooks only
   python3 - <<PYEOF
-import json, sys
+import json
 with open("$HOOKS_SRC") as f:
-    hooks_data = json.load(f)
-result = {"hooks": hooks_data["hooks"]}
+    relay_hooks = json.load(f)
 with open("$SETTINGS_FILE", "w") as f:
-    json.dump(result, f, indent=2, ensure_ascii=False)
+    json.dump({"hooks": relay_hooks}, f, indent=2, ensure_ascii=False)
 print("  created $SETTINGS_FILE")
 PYEOF
 else
-  # Merge relay hooks into existing settings.json
   python3 - <<PYEOF
-import json, sys
+import json
 
 with open("$SETTINGS_FILE") as f:
     settings = json.load(f)
 with open("$HOOKS_SRC") as f:
-    relay_hooks = json.load(f)["hooks"]
+    relay_hooks = json.load(f)
 
 existing = settings.setdefault("hooks", {})
 for event, entries in relay_hooks.items():
     if event not in existing:
         existing[event] = entries
     else:
-        # Append relay hooks if not already present (dedup by prompt content)
         existing_prompts = {
             h.get("prompt", "") or h.get("hooks", [{}])[0].get("prompt", "")
             for h in existing[event]

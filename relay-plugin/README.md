@@ -796,39 +796,41 @@ created_at: 2026-03-28
 ```
 relay-plugin/
 ├── .claude-plugin/
-│   └── plugin.json              # 플러그인 매니페스트
-├── agents/                      # Claude Code teammate 모드 전용
-│   ├── steering-orchestrator.md
-│   ├── team-leader.md
-│   ├── team-leader-zai.md       # Zai(GLM) teammate 모드 (ANTHROPIC_BASE_URL 교체)
-│   ├── developer.md
-│   ├── developer-zai.md         # Zai(GLM) teammate 모드 (ANTHROPIC_BASE_URL 교체)
-│   ├── developer-gemini.md      # Gemini MCP teammate 모드 (gemini_mcp 위임)
-│   ├── developer-openai.md      # OpenAI MCP teammate 모드 (codex_mcp 위임, OAuth 지원)
-│   ├── expert-builder.md
-│   ├── meeting-recorder.md
-│   ├── specialist.md            # general 도메인 범용 작업자
-│   ├── reviewer.md              # 코드·문서 검토 (general / development)
-│   ├── qa-engineer.md           # 독립 품질 검증 (development)
-│   ├── researcher.md            # 조사·분석 (general)
-│   └── devops-engineer.md       # CI/CD·배포·인프라 (development)
-├── commands/
-│   └── relay/                   # /relay:* 슬래시 명령어
-│       ├── setup.md
-│       ├── setup-keys.md        # Gemini / OpenAI(API키·OAuth) / Zhipu AI
-│       ├── define-expert.md     # backed_by: gemini/codex/zai 포함
-│       ├── build-team.md
-│       ├── invoke-agent.md      # 페르소나 합성 + 컨텍스트 압축 + backed_by 우선 해석
-│       ├── visualize-team.md
-│       ├── write-design-decision.md
-│       ├── escalate.md
-│       ├── read-context.md
-│       ├── progress-sync.md
-│       ├── meeting.md
+│   ├── plugin.json              # 플러그인 매니페스트 (name: relay)
+│   └── hooks.json               # 세션 자동화 훅 (플러그인 설치 시 자동 등록)
+├── .claude/                     # 플러그인 콘텐츠 — Claude Code 가 이 구조를 인식
+│   ├── agents/                  # teammate 모드 에이전트
+│   │   ├── steering-orchestrator.md
+│   │   ├── team-leader.md
+│   │   ├── team-leader-zai.md   # Zai(GLM) teammate 모드
+│   │   ├── developer.md
+│   │   ├── developer-zai.md     # Zai(GLM) teammate 모드
+│   │   ├── developer-gemini.md  # Gemini MCP teammate 모드
+│   │   ├── developer-openai.md  # OpenAI MCP teammate 모드 (OAuth 지원)
+│   │   ├── expert-builder.md
+│   │   ├── meeting-recorder.md
+│   │   ├── specialist.md        # general 도메인 범용 작업자
+│   │   ├── reviewer.md          # 코드·문서 검토 (general / development)
+│   │   ├── qa-engineer.md       # 독립 품질 검증 (development)
+│   │   ├── researcher.md        # 조사·분석 (general)
+│   │   └── devops-engineer.md   # CI/CD·배포·인프라 (development)
+│   └── commands/                # /relay:* 슬래시 명령어
+│       │                        # 플러그인명(relay) + 파일명 = 명령어
+│       ├── setup.md             → /relay:setup
+│       ├── setup-keys.md        → /relay:setup-keys
+│       ├── define-expert.md     → /relay:define-expert
+│       ├── build-team.md        → /relay:build-team
+│       ├── invoke-agent.md      → /relay:invoke-agent
+│       ├── visualize-team.md    → /relay:visualize-team
+│       ├── write-design-decision.md → /relay:write-design-decision
+│       ├── escalate.md          → /relay:escalate
+│       ├── read-context.md      → /relay:read-context
+│       ├── progress-sync.md     → /relay:progress-sync
+│       ├── meeting.md           → /relay:meeting
 │       └── dev/
-│           ├── tdd-cycle.md
-│           ├── ddd-design.md
-│           └── create-implementation-plan.md
+│           ├── tdd-cycle.md     → /relay:dev:tdd-cycle
+│           ├── ddd-design.md    → /relay:dev:ddd-design
+│           └── create-implementation-plan.md → /relay:dev:create-implementation-plan
 ├── docs/
 │   ├── agent-definition-and-invocation.md
 │   ├── agent-profiles/          # in-process 모드 참조 프로파일 (teammate 모드와 분리)
@@ -840,11 +842,9 @@ relay-plugin/
 │       ├── definitions/         # 역할별 composed-agent 정의 (14종)
 │       └── modules/
 │           ├── base/            # 도메인 기반 base 모듈 (6종)
-│           ├── capabilities/    # 기능 모듈 (15종, context-compression v2 포함)
+│           ├── capabilities/    # 기능 모듈 (15종)
 │           ├── platforms/       # 플랫폼 모듈 (5종)
 │           └── policies/        # 정책 모듈 (1종)
-└── hooks/
-    └── hooks.json               # /relay:setup 이 .claude/settings.json 에 병합
 
 mcp-servers/                     # relay-plugin 과 형제 디렉토리 (플러그인 외부)
 ├── gemini-wrapper/server.py
@@ -853,13 +853,19 @@ mcp-servers/                     # relay-plugin 과 형제 디렉토리 (플러�
 └── mcp.json.template
 ```
 
+> **명령어 네임스페이스 규칙**
+>
+> 플러그인명(`relay`) + 파일 경로가 명령어 이름이 됩니다.
+> - `.claude/commands/setup.md` → `/relay:setup`
+> - `.claude/commands/dev/tdd-cycle.md` → `/relay:dev:tdd-cycle`
+
 > **`agents/` vs `docs/agent-profiles/` 차이**
 >
 > | 위치 | 실행 모드 | MCP 호출 주체 | 페르소나 합성 주체 |
 > |---|---|---|---|
-> | `agents/developer-zai.md` | teammate | — (ANTHROPIC_BASE_URL 교체) | teammate 자체 |
-> | `agents/developer-gemini.md` | teammate | teammate 자체 (gemini_mcp) | teammate 자체 |
-> | `agents/developer-openai.md` | teammate | teammate 자체 (codex_mcp) | teammate 자체 |
+> | `.claude/agents/developer-zai.md` | teammate | — (ANTHROPIC_BASE_URL 교체) | teammate 자체 |
+> | `.claude/agents/developer-gemini.md` | teammate | teammate 자체 (gemini_mcp) | teammate 자체 |
+> | `.claude/agents/developer-openai.md` | teammate | teammate 자체 (codex_mcp) | teammate 자체 |
 > | `docs/agent-profiles/developer-gemini-mcp.md` | **in-process** | invoke-agent (gemini_mcp) | invoke-agent |
 > | `docs/agent-profiles/developer-openai-mcp.md` | **in-process** | invoke-agent (codex_mcp) | invoke-agent |
 >

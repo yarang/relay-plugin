@@ -1,9 +1,7 @@
 # Git ignore
 
-# relay-plugin
-.cclaude-plugin/
-.cclaude/relay/
-.claude/
+# relay-plugin — 저장소 루트의 .claude/ 만 무시 (relay-plugin/.claude/ 는 플러그인 콘텐츠)
+/.claude/
 agent-library/
 *.DS_Store
 *.pyc
