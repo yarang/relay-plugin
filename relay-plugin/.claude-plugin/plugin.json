@@ -1,6 +1,6 @@
 {
   "name": "relay",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Prompt-based hierarchical agent team framework for Claude Code. Define expert personas, build layered teams, and delegate across Claude and external LLMs — no code required.",
   "author": {
     "name": "yarang"
