@@ -29,9 +29,9 @@ relay:developer와 동일하지만, Zai 모드로 실행됩니다.
 env CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 \
   ANTHROPIC_BASE_URL=https://api.z.ai/api/anthropic \
   ANTHROPIC_DEFAULT_SONNET_MODEL=glm-4.7 \
-  /path/to/claude --settings .agent_forge_for_zai.json \
+  ~/.local/bin/claude --settings .agent_forge_for_zai.json \
   --teammate-mode tmux \
-  --plugin-dir /path/to/relay-plugin
+  --plugin-dir /Users/yarang/working/agent_teams/relay-plugin
 ```
 
 ## 주요 스킬

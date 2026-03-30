@@ -390,7 +390,7 @@ gemini_mcp.gemini_generate(
 ```bash
 # teammate 실행 (ANTHROPIC_BASE_URL 오버라이드 없음)
 env CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 \
-  claude --teammate-mode tmux --plugin-dir /path/to/relay-plugin
+  claude --teammate-mode tmux --plugin-dir /Users/yarang/working/agent_teams/relay-plugin
 ```
 
 #### mode: subagent
@@ -429,7 +429,7 @@ codex_mcp.codex_generate(
 
 ```bash
 env CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 \
-  claude --teammate-mode tmux --plugin-dir /path/to/relay-plugin
+  claude --teammate-mode tmux --plugin-dir /Users/yarang/working/agent_teams/relay-plugin
 ```
 
 #### mode: subagent
