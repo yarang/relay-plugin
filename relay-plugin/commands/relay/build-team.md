@@ -26,8 +26,8 @@
 
 ```
 선택 가능한 전문가:
-  1. SNS 마케터 (sns-marketer)          ← backed_by: moai:sns-content-creator
-  2. 법무 검토 전문가 (legal-reviewer)   ← backed_by: moai:contract-reviewer
+  1. SNS 마케터 (sns-marketer)          ← backed_by: gemini:gemini-2.5-flash
+  2. 법무 검토 전문가 (legal-reviewer)   ← backed_by: codex:gpt-4o
   3. 백엔드 개발자 (backend-dev)         ← backed_by: relay:developer
   4. 데이터 분석가 (data-analyst)        ← 직접 정의
 ```

@@ -36,11 +36,11 @@ effort: normal
 
 ```
 # 위임 예시
-SNS 마케터 (backed_by: moai:sns-content-creator)
-  → moai:sns-content-creator 호출 → 결과 수령 → /relay:progress-sync 보고
+SNS 마케터 (backed_by: gemini:gemini-2.5-flash)
+  → gemini_mcp 호출 → 결과 수령 → /relay:progress-sync 보고
 
-법무 검토 전문가 (backed_by: moai:contract-reviewer)
-  → moai:contract-reviewer 호출 → 검토 결과 통합 → 필요 시 에스컬레이션
+법무 검토 전문가 (backed_by: codex:gpt-4o)
+  → codex_mcp 호출 → 검토 결과 통합 → 필요 시 에스컬레이션
 
 백엔드 개발자 (backed_by: relay:developer, agent_profile: backend-developer, default_platform: fastapi)
   → /relay:invoke-agent 로 fastapi 조합 해석 → relay:developer 호출 → PLAN / 진행 상황 반영

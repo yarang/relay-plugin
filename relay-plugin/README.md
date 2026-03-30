@@ -2,7 +2,7 @@
 
 > **프롬프트 기반 계층형 에이전트 팀 프레임워크**
 
-사용자 정의 전문가와 계층형 팀 구조를 **프롬프트만으로** 유연하게 설계·운용하는 Claude Code 플러그인.
+사용자 정의 전문가와 계층형 팀 구조를 **프롬프트만으로** 유연하게 설계·운용하는 Claude Code 확장.
 
 **특징**: 코드 없이, 지침과 명령어만으로 작동합니다.
 
@@ -10,11 +10,9 @@
 
 ---
 
----
-
 ## 목차
 
-1. [설치](#설치)
+1. [설치](#설치) — 플러그인 설치 · 초기화 · 외부 LLM 설정
 2. [빠른 시작](#빠른-시작)
 3. [핵심 개념](#핵심-개념)
 4. [전문가 백엔드 — backed_by](#전문가-백엔드--backed_by)
@@ -34,8 +32,14 @@
 ## 설치
 
 ```bash
-claude plugin install relay --scope project
+# 마켓플레이스 등록 (최초 1회)
+claude plugin marketplace add yarang/relay-plugin
+
+# 플러그인 설치
+claude plugin install relay@relay-plugin
 ```
+
+설치 후 `/relay:setup` 으로 시작합니다. 저장소 구조와 수동 설치는 **[저장소 루트 README](../README.md)** 를 참조하세요.
 
 ---
 
@@ -176,7 +180,6 @@ expert.backed_by 없음  →  definition.default_agent 사용
 | 네임스페이스 | 백엔드 | 비고 |
 |---|---|---|
 | `relay:*` | relay 내부 에이전트 | 별도 설치 불필요 |
-| `moai:*` | moai 플러그인 에이전트 | moai 플러그인 설치 필요 |
 | `gemini:*` | Google Gemini (MCP) | API 키 + MCP 서버 필요 |
 | `codex:*` | OpenAI GPT / o 시리즈 (MCP) | API 키 또는 OAuth |
 | `zai:*` | Zhipu AI GLM 시리즈 (MCP) | API 키, glm-4-flash 무료 |
@@ -184,27 +187,36 @@ expert.backed_by 없음  →  definition.default_agent 사용
 
 ### relay:* — 내부 에이전트
 
-| 값 | 설명 |
-|---|---|
-| `relay:developer` | 하위팀 개발자 (TDD 지원) |
-| `relay:developer-zai` | Zai(GLM) 기반 개발자 (비용 절감) |
-| `relay:team-leader` | 팀 리더 (브릿지) |
-| `relay:team-leader-zai` | Zai(GLM) 기반 팀 리더 |
-| `relay:steering-orchestrator` | 상위팀 오케스트레이터 |
-| `relay:meeting-recorder` | 회의 서기 (자동 활성화) |
+**계층 구조 에이전트**
 
-### moai:* — 플러그인 에이전트
+| 값 | 도메인 | 설명 |
+|---|---|---|
+| `relay:steering-orchestrator` | 공통 | 상위팀 오케스트레이터 — 아키텍처 결정·팀 간 조율 |
+| `relay:team-leader` | 공통 | 팀 리더 — 작업 배분·진행 관리·에스컬레이션 |
+| `relay:team-leader-zai` | 공통 | Zai(GLM) 기반 팀 리더 (비용 절감) |
 
-| 값 | 설명 |
-|---|---|
-| `moai:sns-content-creator` | SNS 콘텐츠 마케터 |
-| `moai:contract-reviewer` | 계약서·법무 검토 |
-| `moai:biz-email-writer` | 비즈니스 이메일 작성 |
-| `moai:data-report-generator` | 데이터 분석·리포트 |
-| `moai:meeting-minutes` | 회의록 정리 |
-| `moai:biz-plan-writer` | 사업계획서 작성 |
-| `moai:proposal-maker` | 제안서·견적서 |
-| *(moai 플러그인 스킬 전체)* | `/relay:define-expert` 에서 목록 확인 |
+**실행 담당 에이전트**
+
+| 값 | 도메인 | 설명 |
+|---|---|---|
+| `relay:developer` | development | 구현 담당 — TDD/DDD 사이클 지원 |
+| `relay:developer-zai` | development | Zai(GLM) 기반 개발자 (비용 절감) |
+| `relay:specialist` | general | 범용 실행 담당 — 마케팅·법무·기획·영업 등 |
+| `relay:researcher` | general | 조사·분석 담당 — 시장 조사·요구사항 수집 |
+
+**품질·검증 에이전트**
+
+| 값 | 도메인 | 설명 |
+|---|---|---|
+| `relay:reviewer` | 공통 | 코드·문서·산출물 검토 — 승인/반려 판정 |
+| `relay:qa-engineer` | development | 테스트 전략·버그 리포트·E2E 검증 |
+| `relay:devops-engineer` | development | CI/CD·인프라·배포 파이프라인 |
+
+**지원 에이전트**
+
+| 값 | 도메인 | 설명 |
+|---|---|---|
+| `relay:meeting-recorder` | 공통 | 회의 서기 — 세션 시작 시 자동 활성화 |
 
 ### gemini:* — Google Gemini (MCP 필요)
 
@@ -285,7 +297,7 @@ MCP 서버가 런타임에 `OPENAI_OAUTH_TOKEN` 을 자동 탐색합니다.
 ### MCP 서버 위치
 
 ```
-mcp-servers/
+~/.local/share/relay-plugin/mcp-servers/
 ├── gemini-wrapper/server.py    # backed_by: gemini:*
 ├── codex-wrapper/server.py     # backed_by: codex:*  (API 키 / OAuth)
 └── zai-wrapper/server.py       # backed_by: zai:*
@@ -326,8 +338,7 @@ mcp-servers/
 ```bash
 env CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 \
   claude \
-  --teammate-mode tmux \
-  --plugin-dir ~/working/agent_teams/relay-plugin
+  --teammate-mode tmux
 ```
 
 **Zai teammate**: `ANTHROPIC_BASE_URL=https://api.z.ai/api/anthropic` 교체 → 모델 자체가 GLM 으로 변경됨.
@@ -382,7 +393,7 @@ subagent 호환성: ✅ .mcp.json 자동 상속 → 모든 MCP 도구 사용 가
 
 ```bash
 # 전문가 파일 복사
-cp relay-plugin/docs/experts/context-compressor.md \
+cp ~/.local/share/relay-plugin/relay-plugin/docs/experts/context-compressor.md \
    .claude/relay/experts/context-compressor.md
 
 # API 키 등록 (glm-4-flash 무료)
@@ -510,14 +521,12 @@ backed_by: gemini:gemini-2.5-flash
 
 ```mermaid
 flowchart TD
-    Q1{외부 플러그인 에이전트 있음?}
-    Q1 -->|Yes| MOAI["moai:* 또는 relay:*\n별도 MCP 설치 불필요"]
-    Q1 -->|No| Q2{외부 LLM 사용?}
-    Q2 -->|No| NULL["null\n직접 페르소나 정의"]
-    Q2 -->|Yes| Q3{비용 우선?}
-    Q3 -->|최저| ZAI["zai:glm-4-flash\n무료 티어"]
-    Q3 -->|균형| GEMINI["gemini:gemini-2.5-flash\n빠른 처리"]
-    Q3 -->|고성능| CODEX["codex:gpt-4o\n범용 고성능"]
+    Q1{외부 LLM 사용?}
+    Q1 -->|No| NULL["null\n직접 페르소나 정의"]
+    Q1 -->|Yes| Q2{비용 우선?}
+    Q2 -->|최저| ZAI["zai:glm-4-flash\n무료 티어"]
+    Q2 -->|균형| GEMINI["gemini:gemini-2.5-flash\n빠른 처리"]
+    Q2 -->|고성능| CODEX["codex:gpt-4o\n범용 고성능"]
 ```
 
 ---
@@ -578,7 +587,7 @@ graph TD
     MT["marketing-team"]
     ML["team-leader: marketing-lead"]
     SM["sns-marketer\nbacked_by: gemini:gemini-2.5-flash"]
-    LR["legal-reviewer\nbacked_by: moai:contract-reviewer"]
+    LR["legal-reviewer\nbacked_by: codex:gpt-4o"]
     CC["context-compressor\nbacked_by: zai:glm-4-flash"]
 
     ST --> MT
@@ -787,7 +796,7 @@ created_at: 2026-03-28
 ```
 relay-plugin/
 ├── .claude-plugin/
-│   └── plugin.json              # v0.4.0
+│   └── plugin.json              # 플러그인 매니페스트
 ├── agents/                      # Claude Code teammate 모드 전용
 │   ├── steering-orchestrator.md
 │   ├── team-leader.md
@@ -797,7 +806,29 @@ relay-plugin/
 │   ├── developer-gemini.md      # Gemini MCP teammate 모드 (gemini_mcp 위임)
 │   ├── developer-openai.md      # OpenAI MCP teammate 모드 (codex_mcp 위임, OAuth 지원)
 │   ├── expert-builder.md
-│   └── meeting-recorder.md
+│   ├── meeting-recorder.md
+│   ├── specialist.md            # general 도메인 범용 작업자
+│   ├── reviewer.md              # 코드·문서 검토 (general / development)
+│   ├── qa-engineer.md           # 독립 품질 검증 (development)
+│   ├── researcher.md            # 조사·분석 (general)
+│   └── devops-engineer.md       # CI/CD·배포·인프라 (development)
+├── commands/
+│   └── relay/                   # /relay:* 슬래시 명령어
+│       ├── setup.md
+│       ├── setup-keys.md        # Gemini / OpenAI(API키·OAuth) / Zhipu AI
+│       ├── define-expert.md     # backed_by: gemini/codex/zai 포함
+│       ├── build-team.md
+│       ├── invoke-agent.md      # 페르소나 합성 + 컨텍스트 압축 + backed_by 우선 해석
+│       ├── visualize-team.md
+│       ├── write-design-decision.md
+│       ├── escalate.md
+│       ├── read-context.md
+│       ├── progress-sync.md
+│       ├── meeting.md
+│       └── dev/
+│           ├── tdd-cycle.md
+│           ├── ddd-design.md
+│           └── create-implementation-plan.md
 ├── docs/
 │   ├── agent-definition-and-invocation.md
 │   ├── agent-profiles/          # in-process 모드 참조 프로파일 (teammate 모드와 분리)
@@ -812,30 +843,8 @@ relay-plugin/
 │           ├── capabilities/    # 기능 모듈 (15종, context-compression v2 포함)
 │           ├── platforms/       # 플랫폼 모듈 (5종)
 │           └── policies/        # 정책 모듈 (1종)
-├── shared-context-template/     # /relay:setup 시 .claude/relay/shared-context/ 초기화 기준
-│   ├── design-decisions/
-│   ├── domain-models/
-│   ├── implementation-plans/
-│   ├── meetings/
-│   └── test-reports/
-├── skills/
-│   ├── setup/
-│   ├── setup-keys/              # Gemini / OpenAI(API키·OAuth) / Zhipu AI
-│   ├── define-expert/           # backed_by: gemini/codex/zai 포함
-│   ├── build-team/
-│   ├── invoke-agent/            # 페르소나 합성 + 컨텍스트 압축 + backed_by 우선 해석
-│   ├── visualize-team/
-│   ├── write-design-decision/
-│   ├── escalate/
-│   ├── read-context/
-│   ├── progress-sync/
-│   ├── meeting/
-│   └── dev/
-│       ├── tdd-cycle/
-│       ├── ddd-design/
-│       └── create-implementation-plan/
 └── hooks/
-    └── hooks.json
+    └── hooks.json               # /relay:setup 이 .claude/settings.json 에 병합
 
 mcp-servers/                     # relay-plugin 과 형제 디렉토리 (플러그인 외부)
 ├── gemini-wrapper/server.py

@@ -356,16 +356,6 @@ relay:developer   → agents/developer.md
 relay:team-leader → agents/team-leader.md
 ```
 
-### `moai:*` (또는 기타 플러그인)
-
-해당 플러그인 에이전트를 호출합니다.
-relay의 회의 기록·진행 보고·escalation 규칙을 함께 부착합니다.
-
-```
-moai:sns-content-creator  → moai 플러그인 에이전트 호출
-moai:contract-reviewer    → moai 플러그인 에이전트 호출
-```
-
 ### `gemini:{model}` — 모드별 처리
 
 #### mode: inprocess (기본)

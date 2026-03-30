@@ -13,8 +13,8 @@
 2. 역할명·분야 파악
 3. 외부 에이전트 위임 여부 질문:
 
-   "이 역할의 실제 작업을 기존 에이전트에게 위임하시겠습니까?
-    예) moai:sns-content-creator, moai:contract-reviewer, relay:developer
+   "이 역할의 실제 작업을 외부 LLM 에이전트에게 위임하시겠습니까?
+    예) gemini:gemini-2.5-flash, codex:gpt-4o, zai:glm-4-flash, relay:developer
     직접 정의하려면 '없음'을 선택하세요."
 
    → 위임함 : backed_by 에 외부 에이전트 지정 후 4번으로 이동
@@ -69,12 +69,7 @@ default_platform: {기본 platform 또는 null}
 ## backed_by 예시
 
 ```yaml
-# ── 플러그인 에이전트 ──────────────────────────────
-backed_by: moai:sns-content-creator    # SNS 콘텐츠 마케터
-backed_by: moai:contract-reviewer      # 법무 검토 전문가
-backed_by: moai:biz-email-writer       # 비즈니스 커뮤니케이션 담당
-backed_by: moai:data-report-generator  # 데이터 분석가
-backed_by: moai:meeting-minutes        # 회의 정리 전문가
+# ── relay 내부 에이전트 ────────────────────────────
 backed_by: relay:developer             # relay 기본 개발자
 
 # ── Google Gemini (MCP 필요) ───────────────────────

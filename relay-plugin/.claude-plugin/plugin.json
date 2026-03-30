@@ -1,12 +1,8 @@
 {
   "name": "relay",
   "version": "0.4.0",
-  "description": "사용자 정의 전문가와 계층형 팀 구조를 프롬프트만으로 유연하게 설계·운용하는 플러그인. 조합형 agent definition, 플랫폼 선택형 실행, 도메인 팩 기반 팀 운영을 지원한다.",
+  "description": "Prompt-based hierarchical agent team framework for Claude Code. Define expert personas, build layered teams, and delegate across Claude and external LLMs — no code required.",
   "author": {
-    "name": "William",
-    "email": "yarang@gmail.com"
-  },
-  "skills": "./skills/",
-  "data_dir": ".claude/relay",
-  "keywords": ["team", "agents", "hierarchy", "expert", "multi-agent", "orchestration"]
+    "name": "yarang"
+  }
 }

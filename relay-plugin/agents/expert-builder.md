@@ -61,8 +61,8 @@ default_platform: {기본 platform 또는 null}
 1. 사용자에게 전문가의 역할과 분야를 질문합니다.
 2. 외부 에이전트 위임 여부를 질문합니다:
 
-   > "이 역할의 실제 작업을 기존 에이전트에게 위임하시겠습니까?
-   > 예) moai:sns-content-creator, moai:contract-reviewer, relay:developer
+   > "이 역할의 실제 작업을 외부 LLM 에이전트에게 위임하시겠습니까?
+   > 예) gemini:gemini-2.5-flash, codex:gpt-4o, zai:glm-4-flash, relay:developer
    > 직접 정의하려면 '없음'을 선택하세요."
 
    - **위임함**: `backed_by` 에 외부 에이전트를 지정하고 4번으로 건너뜁니다.
@@ -78,11 +78,9 @@ default_platform: {기본 platform 또는 null}
 ## backed_by 예시
 
 ```yaml
-backed_by: moai:sns-content-creator    # SNS 콘텐츠 마케터
-backed_by: moai:contract-reviewer      # 법무 검토 전문가
-backed_by: moai:biz-email-writer       # 비즈니스 커뮤니케이션 담당
-backed_by: moai:data-report-generator  # 데이터 분석가
-backed_by: moai:meeting-minutes        # 회의 정리 전문가
 backed_by: relay:developer             # relay 기본 개발자
+backed_by: gemini:gemini-2.5-flash     # Google Gemini
+backed_by: codex:gpt-4o                # OpenAI GPT
+backed_by: zai:glm-4-flash             # Zhipu AI GLM (무료)
 backed_by: null                        # 직접 정의 (외부 에이전트 없음)
 ```
