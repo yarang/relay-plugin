@@ -32,7 +32,7 @@ env CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 \
   ANTHROPIC_DEFAULT_SONNET_MODEL=glm-5 \
   ~/.local/bin/claude --settings .agent_forge_for_zai.json \
   --teammate-mode tmux \
-  --plugin-dir /Users/yarang/working/agent_teams/relay-plugin
+  --plugin-dir ~/working/agent_teams/relay-plugin
 ```
 
 ## 주요 스킬

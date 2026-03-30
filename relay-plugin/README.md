@@ -327,7 +327,7 @@ mcp-servers/
 env CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 \
   claude \
   --teammate-mode tmux \
-  --plugin-dir /Users/yarang/working/agent_teams/relay-plugin
+  --plugin-dir ~/working/agent_teams/relay-plugin
 ```
 
 **Zai teammate**: `ANTHROPIC_BASE_URL=https://api.z.ai/api/anthropic` 교체 → 모델 자체가 GLM 으로 변경됨.

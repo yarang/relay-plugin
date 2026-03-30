@@ -17,7 +17,7 @@
 3. `.claude/relay/agent-library/modules/`
 4. `.claude/relay/experts/`
 
-정의 파일이 없으면 [docs/agent-definition-and-invocation.md](/Users/yarang/working/agent_teams/relay-plugin/docs/agent-definition-and-invocation.md) 형식에 맞춰 먼저 생성하도록 안내합니다.
+정의 파일이 없으면 [docs/agent-definition-and-invocation.md](docs/agent-definition-and-invocation.md) 형식에 맞춰 먼저 생성하도록 안내합니다.
 
 ## 실행 모드
 
@@ -390,7 +390,7 @@ gemini_mcp.gemini_generate(
 ```bash
 # teammate 실행 (ANTHROPIC_BASE_URL 오버라이드 없음)
 env CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 \
-  claude --teammate-mode tmux --plugin-dir /Users/yarang/working/agent_teams/relay-plugin
+  claude --teammate-mode tmux --plugin-dir ~/working/agent_teams/relay-plugin
 ```
 
 #### mode: subagent
@@ -429,7 +429,7 @@ codex_mcp.codex_generate(
 
 ```bash
 env CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 \
-  claude --teammate-mode tmux --plugin-dir /Users/yarang/working/agent_teams/relay-plugin
+  claude --teammate-mode tmux --plugin-dir ~/working/agent_teams/relay-plugin
 ```
 
 #### mode: subagent
