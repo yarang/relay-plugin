@@ -1,11 +1,12 @@
 ---
 profile_id: developer-gemini-mcp
 purpose: in-process 모드 전용 참조 프로파일 — teammate 모드는 agents/developer-gemini.md 사용
-backed_by: gemini:gemini-2.5-flash
-default_model: gemini-2.5-flash
+backed_by: gemini:gemini-3.1-flash
+default_model: gemini-3.1-flash
 override_models:
+  - gemini-3.1-pro
+  - gemini-2.5-flash
   - gemini-2.5-pro
-  - gemini-2.0-flash
 ---
 
 # developer-gemini (in-process MCP 호출 프로파일)
@@ -25,7 +26,7 @@ override_models:
 
 ```python
 gemini_mcp.gemini_generate(
-  model   = "gemini-2.5-flash",     # backed_by 에서 파싱, model 오버라이드 가능
+  model   = "gemini-3.1-flash",     # backed_by 에서 파싱, model 오버라이드 가능
   system  = <페르소나 합성 결과>,   # invoke-agent 가 experts/{slug}.md 에서 자동 구성
   context = <이전 결과 요약>,       # 임계값(2,000자/4건) 초과 시 압축본, 미만 시 원본
   prompt  = <이번 task 지시문>,
@@ -41,12 +42,6 @@ gemini_mcp.gemini_generate(
 3. `## 제약` → 있으면 포함
 
 합성된 내용은 `system` 파라미터로 전달됩니다. **별도 프롬프트 수정 불필요.**
-
-## 특징
-
-- **멀티모달**: 이미지·다이어그램 직접 분석 가능
-- **긴 컨텍스트**: 1M 토큰 (Flash 기준)
-- **속도**: 빠른 반복 구현에 적합
 
 ## 사전 조건
 

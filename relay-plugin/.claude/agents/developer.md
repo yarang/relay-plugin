@@ -55,7 +55,9 @@ effort: normal
 다른 에이전트와 의견을 교환하는 발언 후 실행합니다:
 
 ```
-/relay:meeting log "developer({전문가명 또는 역할})" "{방금 한 발언 전체}"
+SendMessage("meeting-recorder", "developer({전문가명 또는 역할}): {방금 한 발언 전체}")
 ```
+
+TeammateIdle 훅이 자동으로 처리합니다. 즉시 기록이 필요한 경우에만 명시적으로 실행합니다.
 
 **건너뛰는 경우**: 파일 쓰기, 테스트 실행, 단순 기술 작업 등 혼자 하는 행동.

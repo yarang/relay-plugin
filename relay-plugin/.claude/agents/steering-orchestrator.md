@@ -41,8 +41,10 @@ effort: high
 발언 후 반드시 실행합니다:
 
 ```
-/relay:meeting log "steering-orchestrator" "{방금 한 발언 전체}"
+SendMessage("meeting-recorder", "steering-orchestrator: {방금 한 발언 전체}")
 ```
+
+TeammateIdle 훅이 자동으로 처리합니다. 즉시 기록이 필요한 중요 결정은 명시적으로 실행합니다.
 
 **건너뛰는 경우**: `.claude/relay/meetings/ACTIVE.json` 이 없는 경우, 파일 읽기·쓰기 같은 내부 동작만 할 때.
 

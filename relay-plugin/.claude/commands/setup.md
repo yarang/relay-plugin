@@ -2,6 +2,26 @@
 
 팀 운용 환경을 초기화합니다. **프로젝트 시작 시 1회 실행**합니다.
 
+## 사전 요구사항
+
+relay 플러그인은 **Claude Code Agent Teams 모드 전용**입니다.
+
+`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` 설정 여부를 먼저 확인합니다.
+미설정 시 아래 안내를 출력하고 이후 단계를 중단합니다:
+
+```
+⚠️ Agent Teams 모드가 필요합니다.
+
+~/.claude/settings.json 의 env 섹션에 추가하세요:
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  }
+}
+
+추가 후 Claude Code 를 재시작하면 적용됩니다.
+```
+
 ## 수행 단계
 
 1. `.claude/relay/domain-config.json` 존재 여부 확인

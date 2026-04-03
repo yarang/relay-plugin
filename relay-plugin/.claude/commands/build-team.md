@@ -34,10 +34,13 @@
 
 ## 팀 유형
 
-| 유형 | 역할 | 의사결정 방식 예시 |
-|---|---|---|
-| upper | 아키텍처·도메인 설계, 팀 간 조율 | `architect_veto` |
-| lower | 실제 구현, 기능 단위 개발 | `leader_decides` / `consensus` |
+| 유형 | execution_mode | 역할 | 의사결정 방식 예시 |
+|---|---|---|---|
+| upper | `teammate` | 아키텍처·도메인 설계, 팀 간 조율 | `architect_veto` |
+| lower | `inprocess` | 실제 구현, 기능 단위 개발 | `leader_decides` / `consensus` |
+
+- **upper (teammate)**: 멤버들이 Agent Teams 로 스폰되어 병렬 실행됩니다. `SendMessage` 로 팀 내 통신합니다.
+- **lower (inprocess)**: team-leader 세션 내에서 MCP 직접 호출로 순차 실행됩니다.
 
 ## 저장 형식
 
@@ -48,6 +51,7 @@
   "name": "{팀명}",
   "slug": "{팀-슬러그}",
   "type": "upper | lower",
+  "execution_mode": "teammate | inprocess",
   "purpose": "{팀 목적}",
   "decision_mode": "leader_decides | consensus | vote | architect_veto",
   "members": [

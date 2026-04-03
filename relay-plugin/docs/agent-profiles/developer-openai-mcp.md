@@ -1,12 +1,12 @@
 ---
 profile_id: developer-openai-mcp
 purpose: in-process 모드 전용 참조 프로파일 — teammate 모드는 agents/developer-openai.md 사용
-backed_by: codex:gpt-4o
-default_model: gpt-4o
+backed_by: codex:gpt-5.4-mini
+default_model: gpt-5.4-mini
 override_models:
-  - o3
-  - o4-mini
-  - gpt-4o-mini
+  - gpt-5.4
+  - gpt-5.4-pro
+  - o3-deep-research
 auth_modes:
   - api_key
   - oauth
@@ -29,7 +29,7 @@ auth_modes:
 
 ```python
 codex_mcp.codex_generate(
-  model   = "gpt-4o",               # backed_by 에서 파싱, model 오버라이드 가능
+  model   = "gpt-5.4-mini",          # backed_by 에서 파싱, model 오버라이드 가능
   system  = <페르소나 합성 결과>,   # invoke-agent 가 experts/{slug}.md 에서 자동 구성
   context = <이전 결과 요약>,       # 임계값(2,000자/4건) 초과 시 압축본, 미만 시 원본
   prompt  = <이번 task 지시문>,

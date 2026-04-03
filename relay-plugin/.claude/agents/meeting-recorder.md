@@ -143,11 +143,30 @@ maxTurns: 200
 *자동 생성 — meeting-recorder ({종료 시각})*
 ```
 
+## SendMessage 수신 프로토콜
+
+에이전트들이 아래 형식으로 메시지를 전송합니다:
+
+```
+SendMessage("meeting-recorder", "{역할명}: {발언 내용}")
+```
+
+수신 즉시 대화록에 추가합니다. `/relay:meeting log` 와 동일하게 처리합니다.
+
+**메시지 형식 파싱**:
+- `{역할명}: {내용}` → 발언자와 내용을 분리하여 표준 대화록 형식으로 기록
+- 형식 불일치 시 → 전체 텍스트를 내용으로, "unknown"을 발언자로 기록
+
+**자동 처리 대상**:
+- TeammateIdle 훅에서 자동 전송된 메시지
+- 에이전트가 명시적으로 보낸 중요 결정 메시지
+
 ## 명령 처리
 
 | 명령 | 동작 |
 |---|---|
-| `/relay:meeting log "{발언자}" "{발언}"` | 발언을 대화록에 추가 |
+| `SendMessage("meeting-recorder", "{역할}: {발언}")` | 발언을 대화록에 추가 (기본 방식) |
+| `/relay:meeting log "{발언자}" "{발언}"` | 발언을 대화록에 추가 (레거시 방식) |
 | `/relay:meeting new [안건]` | 현재 회의 종료 + 새 회의 즉시 시작 |
 | `/relay:meeting off` | 기록 비활성화 (ACTIVE.json 삭제, 요약본 미생성) |
 | `/relay:meeting on` | 기록 재활성화 (새 transcript 시작) |
