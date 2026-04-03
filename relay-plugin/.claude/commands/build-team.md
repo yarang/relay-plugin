@@ -12,24 +12,27 @@
 ```
 1. 팀 이름·목적 질문
 2. 계층 위치 선택: upper(상위팀) / lower(하위팀)
-3. 사용 가능한 전문가 목록 표시 (backed_by 포함)
+3. 사용 가능한 전문가 목록 표시
 4. 팀원 선택 (리더 1명 필수)
-5. backed_by 있는 팀원에게는 외부 에이전트 자동 표시
-6. 의사결정 방식 선택
-7. 하위팀인 경우: 상위팀 브릿지 멤버 설정
-8. 초안 확인 → 저장
+5. 의사결정 방식 선택
+6. 하위팀인 경우: 상위팀 브릿지 멤버 설정
+7. 초안 확인 → 저장
 ```
 
-## 전문가 목록 표시 형식
+## 전문가 목록 표시
 
-팀원 선택 시 `backed_by` 필드를 함께 표시합니다.
+`.claude/relay/experts/` 디렉토리의 전문가 파일을 읽어 목록을 표시합니다.
 
 ```
-선택 가능한 전문가:
-  1. SNS 마케터 (sns-marketer)          ← backed_by: gemini:gemini-2.5-flash
-  2. 법무 검토 전문가 (legal-reviewer)   ← backed_by: codex:gpt-4o
-  3. 백엔드 개발자 (backend-dev)         ← backed_by: relay:developer
-  4. 데이터 분석가 (data-analyst)        ← 직접 정의
+사용 가능한 전문가:
+  1. SNS 마케터 (sns-marketer)
+     CLI: gemini-fast | 모델: gemini-3-flash-preview | Tier: trivial
+     
+  2. 백엔드 개발자 (backend-dev)
+     CLI: codex | 모델: gpt-5.3-codex | Tier: premium
+     
+  3. 데이터 분석가 (data-analyst)
+     CLI: gemini | 모델: gemini-3-pro-preview | Tier: standard
 ```
 
 ## 팀 유형
@@ -40,7 +43,7 @@
 | lower | `inprocess` | 실제 구현, 기능 단위 개발 | `leader_decides` / `consensus` |
 
 - **upper (teammate)**: 멤버들이 Agent Teams 로 스폰되어 병렬 실행됩니다. `SendMessage` 로 팀 내 통신합니다.
-- **lower (inprocess)**: team-leader 세션 내에서 MCP 직접 호출로 순차 실행됩니다.
+- **lower (inprocess)**: team-leader 세션 내에서 CLI 직접 호출로 순차 실행됩니다.
 
 ## 저장 형식
 
@@ -58,14 +61,12 @@
     {
       "role": "{역할명}",
       "expert_slug": "{전문가 slug}",
-      "backed_by": "{플러그인:에이전트명 또는 null}",
+      "cli": "{cli_variant}",
+      "model": "{model_id}",
+      "tier": "{trivial | standard | premium}",
+      "permission_mode": "{plan | acceptEdits | default}",
+      "phases": ["probe", "grasp", "tangle", "ink"],
       "is_leader": true
-    },
-    {
-      "role": "{역할명}",
-      "expert_slug": "{전문가 slug}",
-      "backed_by": "{플러그인:에이전트명 또는 null}",
-      "is_leader": false
     }
   ],
   "bridge_to": "{상위팀 slug 또는 null}",
@@ -73,7 +74,31 @@
 }
 ```
 
-`backed_by` 값은 전문가 정의 파일(`.claude/relay/experts/{slug}.md`)에서 자동으로 읽어 옵니다.
+각 멤버의 `cli`, `model`, `tier`, `permission_mode`, `phases` 값은 전문가 정의 파일에서 자동으로 읽어옵니다.
+
+## 역할 카테고리 → CLI 자동 매핑
+
+| 카테고리 | 기본 CLI | Tier | Permission |
+|---|---|---|---|
+| 아키텍트/설계자 | `codex` | premium | plan |
+| 백엔드/프론트엔드 개발자 | `codex` | premium | acceptEdits |
+| DB/Cloud 설계자 | `codex` | premium | plan |
+| TDD/QA 엔지니어 | `codex-spark` | standard | acceptEdits |
+| 코드 리뷰어 | `codex-spark` | standard | default |
+| 보안 감사 | `codex` | premium | default |
+| DevOps/디버거 | `codex` | standard | acceptEdits |
+| AI/UX/비즈니스 분석가 | `gemini` | standard | plan |
+| 마케팅/재무/법무 | `gemini` | standard | plan |
+| 문서/다이어그램 | `gemini-fast` | trivial | plan |
+| 전략/연구 종합 | `claude-opus` | premium | plan |
+| GLM 범용 작업자 | `zai` | trivial | acceptEdits |
+
+## 팀 크기 제한
+
+| 팀 유형 | 최소 | 최대 | 권장 |
+|---|---|---|---|
+| upper | 2 | 8 | 3-5 |
+| lower | 2 | 6 | 2-4 |
 
 ## 완료 후
 

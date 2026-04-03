@@ -11,34 +11,58 @@
 ```
 1. "어떤 전문가를 정의하시겠습니까?" 질문
 2. 역할명·분야 파악
-3. 외부 에이전트 위임 여부 질문:
+3. CLI variant 선택 (역할 매트릭스 기반 자동 추천)
 
-   "이 역할의 실제 작업을 외부 LLM 에이전트에게 위임하시겠습니까?
-    예) gemini:gemini-2.5-flash, codex:gpt-4o, zai:glm-4-flash, relay:developer
-    직접 정의하려면 '없음'을 선택하세요."
+   > "이 역할에 추천되는 CLI는 'codex' 입니다.
+   >  다른 CLI를 선택하시겠습니까?
+   >  [1] codex (추천) - 코드 생성, 아키텍처
+   >  [2] gemini - 연구, 분석, 멀티모달
+   >  [3] gemini-fast - 실시간, 대량 처리
+   >  [4] codex-spark - 빠른 리뷰 (15x 빠름)
+   >  [5] zai - 저비용 범용
+   >  [6] 직접 입력"
 
-   → 위임함 : backed_by 에 외부 에이전트 지정 후 4번으로 이동
-   → 직접 정의: 4개 레이어 순서대로 채우기
+4. Phase 배정
 
-4. 조합형 실행 프로필 연결 여부 질문:
+   > "이 전문가가 담당할 Phase를 선택하세요:"
+   >  [ ] probe (연구/요구사항)
+   >  [ ] grasp (설계/아키텍처)
+   >  [ ] tangle (구현/개발)
+   >  [ ] ink (리뷰/배포)
 
-   "이 전문가를 공통 모듈 + 플랫폼 선택 방식으로 실행하시겠습니까?
-    예) backend-developer, default platform: fastapi"
+5. Tier 설정 (자동 추천)
 
-5. 초안 제시 → 피드백 반영
-6. .claude/relay/experts/{slug}.md 저장
+   > "Tier: standard (추천)"
+   >  [1] trivial - 단순 반복, 최저비용
+   >  [2] standard - 일반 분석, 표준 개발
+   >  [3] premium - 아키텍처, 복잡한 추론
+
+6. Permission Mode 설정 (자동 추천)
+
+   > "Permission Mode: plan (추천)"
+   >  [1] plan - 읽기전용, 연구/설계
+   >  [2] acceptEdits - 쓰기가능, 구현/디버깅
+   >  [3] default - 전체도구, 리뷰/관리
+
+7. 초안 제시 → 피드백 반영
+8. .claude/relay/experts/{slug}.md 저장
 ```
 
 ## 저장 형식
 
-```markdown
+```yaml
 ---
 role: {역할명}
 slug: {역할-슬러그}
-domain: {소속 도메인 또는 core}
-backed_by: {플러그인:에이전트명 또는 null}
-agent_profile: {조합형 definition id 또는 null}
-default_platform: {기본 platform 또는 null}
+cli: {cli-variant}                    # codex, codex-spark, gemini, gemini-fast, zai, claude-opus
+model: {model-id}                     # gpt-5.3-codex, gemini-3-pro-preview, glm-4-air 등
+fallback_cli: {cli-variant 또는 null}  # 실패 시 대체 CLI
+tier: {trivial | standard | premium}  # 비용 등급
+permission_mode: {plan | acceptEdits | default}  # 도구 권한
+memory: {project | user | local}      # 컨텍스트 범위
+isolation: {worktree | null}          # git worktree 격리
+phases: [probe, grasp, tangle, ink]   # 담당 phase
+capabilities: []                       # 역량 태그
 created_at: {YYYY-MM-DD}
 ---
 
@@ -46,55 +70,45 @@ created_at: {YYYY-MM-DD}
 
 ## 페르소나
 {직함, 전문 분야, 소통 스타일}
-※ backed_by 가 있으면 해당 에이전트의 기본 특성을 따르며,
-  relay의 팀 구조(회의 기록·보고·에스컬레이션)에 편입됩니다.
 
 ## 역량
 - {할 수 있는 것}
 
 ## 제약
 - {하지 않는 것}
-
-## 접근 권한
-| 디렉토리 | 읽기 | 쓰기 |
-|---|---|---|
-| design-decisions/ | ✅ | ❌ |
-
-## 위임 설정
-backed_by: {플러그인:에이전트명 또는 null}
-agent_profile: {조합형 definition id 또는 null}
-default_platform: {기본 platform 또는 null}
 ```
 
-## backed_by 예시
+## CLI Variant 목록
 
-```yaml
-# ── relay 내부 에이전트 ────────────────────────────
-backed_by: relay:developer             # relay 기본 개발자
+| CLI | 모델 | 용도 | Tier |
+|---|---|---|---|
+| `codex` | `gpt-5.3-codex` | 코드 생성, 아키텍처 | premium |
+| `codex-spark` | `gpt-5.3-codex-spark` | 빠른 리뷰 (15x 빠름) | standard |
+| `codex-mini` | `gpt-5.1-codex-mini` | 저비용 단순 작업 | trivial |
+| `codex-reasoning` | `o3` | 심층 추론, 알고리즘 | premium |
+| `codex-large-context` | `gpt-4.1` | 대형 코드 분석 (1M ctx) | premium |
+| `gemini` | `gemini-3-pro-preview` | 연구, 분석, 멀티모달 | premium |
+| `gemini-fast` | `gemini-3-flash-preview` | 실시간, 대량 처리 | standard |
+| `claude-opus` | `claude-opus-4-6` | 전략, 최고 품질 | premium |
+| `zai` | `glm-4-air` | 저비용 범용 | trivial |
 
-# ── Google Gemini (MCP 필요) ───────────────────────
-backed_by: gemini:gemini-2.5-flash     # 빠른 처리 / 경량 작업
-backed_by: gemini:gemini-2.5-pro       # 고품질 추론 / 복잡한 작업
+## 역할 카테고리 → CLI 자동 매핑
 
-# ── OpenAI GPT / o 시리즈 (MCP 필요) ──────────────
-backed_by: codex:gpt-4o                # 범용 고성능
-backed_by: codex:gpt-4o-mini           # 경량·비용 효율
-backed_by: codex:o3-mini               # 추론 특화
-
-# ── Zhipu AI GLM 시리즈 (MCP 필요) ─────────────────
-backed_by: zai:glm-4-flash             # 무료 티어 / 컨텍스트 압축 권장
-backed_by: zai:glm-4-air               # 저비용 범용
-backed_by: zai:glm-4                   # 고성능
-backed_by: zai:glm-4-long              # 128K 컨텍스트 / 장문 처리
-
-# ── 직접 정의 ──────────────────────────────────────
-backed_by: null                        # 외부 위임 없음, 직접 정의
-```
-
-`gemini:*`, `codex:*`, `zai:*` 선택 시 MCP 서버 등록이 필요합니다.
-→ `mcp-servers/` 디렉토리의 서버를 설치하고 `.mcp.json` 에 등록하세요.
+| 카테고리 | 기본 CLI | Tier | Permission |
+|---|---|---|---|
+| 아키텍트/설계자 | `codex` | premium | plan |
+| 백엔드/프론트엔드 개발자 | `codex` | premium | acceptEdits |
+| DB/Cloud 설계자 | `codex` | premium | plan |
+| TDD/QA 엔지니어 | `codex-spark` | standard | acceptEdits |
+| 코드 리뷰어 | `codex-spark` | standard | default |
+| 보안 감사 | `codex` | premium | default |
+| DevOps/디버거 | `codex` | standard | acceptEdits |
+| AI/UX/비즈니스 분석가 | `gemini` | standard | plan |
+| 마케팅/재무/법무 | `gemini` | standard | plan |
+| 문서/다이어그램 | `gemini-fast` | trivial | plan |
+| 전략/연구 종합 | `claude-opus` | premium | plan |
+| GLM 범용 작업자 | `zai` | trivial | acceptEdits |
 
 ## 완료 후
 
 저장된 전문가를 팀에 배치하려면 `/relay:build-team` 을 실행합니다.
-조합형 프로필이 연결된 전문가는 `/relay:invoke-agent` 로 호출할 수 있습니다.

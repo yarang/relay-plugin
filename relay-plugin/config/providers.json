@@ -1,0 +1,241 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "1.0.0",
+  "description": "Provider configuration for relay CLI-based model invocation",
+
+  "providers": {
+    "codex": {
+      "cli": "codex",
+      "description": "OpenAI Codex flagship - primary code generation",
+      "models": {
+        "flagship": {
+          "id": "gpt-5.3-codex",
+          "description": "Flagship model for complex code generation and architecture"
+        },
+        "fast": {
+          "id": "gpt-5.3-codex-spark",
+          "description": "Ultra-fast variant for quick iterations (15x faster)"
+        },
+        "standard": {
+          "id": "gpt-5.2-codex",
+          "description": "Balanced performance for general development"
+        },
+        "mini": {
+          "id": "gpt-5.1-codex-mini",
+          "description": "Budget-friendly for simple tasks"
+        },
+        "reasoning": {
+          "id": "o3",
+          "description": "Deep reasoning for complex algorithms"
+        },
+        "large-context": {
+          "id": "gpt-4.1",
+          "description": "1M context window for large codebase analysis"
+        }
+      },
+      "default_model": "flagship",
+      "fallback_cli": "codex-spark",
+      "cost_per_1k_tokens": {
+        "input": 0.00015,
+        "output": 0.0006
+      },
+      "avg_latency_ms": 1200
+    },
+
+    "codex-spark": {
+      "cli": "codex-spark",
+      "description": "OpenAI Codex Spark - ultra-fast reviews",
+      "models": {
+        "default": {
+          "id": "gpt-5.3-codex-spark",
+          "description": "Fast feedback loops for reviews and simple tasks"
+        }
+      },
+      "default_model": "default",
+      "fallback_cli": null,
+      "cost_per_1k_tokens": {
+        "input": 0.00005,
+        "output": 0.0002
+      },
+      "avg_latency_ms": 300
+    },
+
+    "codex-mini": {
+      "cli": "codex-mini",
+      "description": "OpenAI Codex Mini - budget option",
+      "models": {
+        "default": {
+          "id": "gpt-5.1-codex-mini",
+          "description": "Cost-efficient for simple repetitive tasks"
+        }
+      },
+      "default_model": "default",
+      "fallback_cli": null,
+      "cost_per_1k_tokens": {
+        "input": 0.00003,
+        "output": 0.0001
+      },
+      "avg_latency_ms": 800
+    },
+
+    "codex-reasoning": {
+      "cli": "codex-reasoning",
+      "description": "OpenAI o3 - deep reasoning",
+      "models": {
+        "default": {
+          "id": "o3",
+          "description": "Complex reasoning and algorithm design"
+        }
+      },
+      "default_model": "default",
+      "fallback_cli": "codex",
+      "cost_per_1k_tokens": {
+        "input": 0.003,
+        "output": 0.012
+      },
+      "avg_latency_ms": 5000
+    },
+
+    "codex-large-context": {
+      "cli": "codex-large-context",
+      "description": "OpenAI GPT-4.1 - 1M context",
+      "models": {
+        "default": {
+          "id": "gpt-4.1",
+          "description": "Large-scale codebase analysis"
+        }
+      },
+      "default_model": "default",
+      "fallback_cli": "codex",
+      "cost_per_1k_tokens": {
+        "input": 0.0001,
+        "output": 0.0004
+      },
+      "avg_latency_ms": 2000
+    },
+
+    "gemini": {
+      "cli": "gemini",
+      "description": "Google Gemini Pro - research and multimodal",
+      "models": {
+        "pro": {
+          "id": "gemini-3-pro-preview",
+          "description": "Deep analysis and multimodal tasks"
+        },
+        "flash": {
+          "id": "gemini-3-flash-preview",
+          "description": "Fast processing for real-time tasks"
+        }
+      },
+      "default_model": "pro",
+      "fallback_cli": "gemini-fast",
+      "cost_per_1k_tokens": {
+        "input": 0.00001,
+        "output": 0.00003
+      },
+      "avg_latency_ms": 800
+    },
+
+    "gemini-fast": {
+      "cli": "gemini-fast",
+      "description": "Google Gemini Flash - speed optimized",
+      "models": {
+        "default": {
+          "id": "gemini-3-flash-preview",
+          "description": "Real-time responses and bulk processing"
+        }
+      },
+      "default_model": "default",
+      "fallback_cli": null,
+      "cost_per_1k_tokens": {
+        "input": 0.000005,
+        "output": 0.000015
+      },
+      "avg_latency_ms": 400
+    },
+
+    "claude-opus": {
+      "cli": "claude-opus",
+      "description": "Anthropic Claude Opus - highest quality",
+      "models": {
+        "default": {
+          "id": "claude-opus-4-6",
+          "description": "Premium quality for strategy and complex design"
+        }
+      },
+      "default_model": "default",
+      "fallback_cli": null,
+      "cost_per_1k_tokens": {
+        "input": 0.015,
+        "output": 0.075
+      },
+      "avg_latency_ms": 3000
+    },
+
+    "zai": {
+      "cli": "zai",
+      "description": "Zhipu AI GLM - cost-effective alternative",
+      "models": {
+        "flash": {
+          "id": "glm-4-flash",
+          "description": "Free tier, fast responses"
+        },
+        "air": {
+          "id": "glm-4-air",
+          "description": "Low-cost balanced performance"
+        },
+        "standard": {
+          "id": "glm-4",
+          "description": "High performance general purpose"
+        },
+        "long": {
+          "id": "glm-4-long",
+          "description": "128K context for long documents"
+        }
+      },
+      "default_model": "air",
+      "fallback_cli": null,
+      "cost_per_1k_tokens": {
+        "input": 0.000001,
+        "output": 0.000001
+      },
+      "avg_latency_ms": 500
+    }
+  },
+
+  "phase_routing": {
+    "probe": {
+      "cli": "codex",
+      "model": "gpt-5.3-codex",
+      "description": "Deep research needs max reasoning"
+    },
+    "grasp": {
+      "cli": "codex",
+      "model": "gpt-5.3-codex",
+      "description": "Requirements analysis needs precision"
+    },
+    "tangle": {
+      "cli": "codex",
+      "model": "gpt-5.3-codex",
+      "description": "Complex implementation"
+    },
+    "ink": {
+      "cli": "codex-spark",
+      "model": "gpt-5.3-codex-spark",
+      "description": "Fast review feedback loops"
+    },
+    "quick": {
+      "cli": "codex-spark",
+      "model": "gpt-5.3-codex-spark",
+      "description": "Speed over depth"
+    },
+    "security": {
+      "cli": "codex",
+      "model": "gpt-5.3-codex",
+      "description": "Thorough security analysis"
+    }
+  },
+
+  "routing_mode": "round-robin",
+  "fallback_chain": ["codex", "codex-spark", "gemini-fast", "zai"]
+}

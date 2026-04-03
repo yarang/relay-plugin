@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["domain", "active_packs", "project_name"],
+  "properties": {
+    "domain": {
+      "type": "string",
+      "description": "Primary domain for the project",
+      "enum": ["development", "general", "custom"]
+    },
+    "active_packs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Active capability packs"
+    },
+    "project_name": {
+      "type": "string",
+      "description": "Human-readable project name"
+    },
+    "configured_at": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of initial configuration"
+    },
+    "coordinator": {
+      "type": "string",
+      "description": "Coordinator model type",
+      "enum": ["claude", "glm"],
+      "default": "glm"
+    },
+    "coordinator_model": {
+      "type": "string",
+      "description": "Specific coordinator model ID",
+      "enum": [
+        "claude-opus-4-6",
+        "claude-sonnet-4-6",
+        "claude-haiku-4-5-20251001",
+        "glm-4-flash",
+        "glm-4-air",
+        "glm-4"
+      ],
+      "default": "glm-4-air"
+    },
+    "fallback_coordinator": {
+      "type": ["string", "null"],
+      "description": "Fallback coordinator if primary fails",
+      "enum": ["claude", "glm", null]
+    },
+    "default_cli": {
+      "type": "string",
+      "description": "Default CLI for external model calls",
+      "enum": [
+        "codex", "codex-spark", "codex-mini", "codex-reasoning", "codex-large-context",
+        "gemini", "gemini-fast", "claude-opus", "zai"
+      ],
+      "default": "codex"
+    },
+    "fallback_cli": {
+      "type": ["string", "null"],
+      "description": "Fallback CLI if default fails",
+      "enum": [
+        "codex", "codex-spark", "codex-mini", "gemini", "gemini-fast", "zai", null
+      ],
+      "default": "codex-spark"
+    },
+    "routing_mode": {
+      "type": "string",
+      "description": "Provider routing strategy",
+      "enum": ["round-robin", "fastest", "cheapest"],
+      "default": "round-robin"
+    },
+    "phase_routing_overrides": {
+      "type": "object",
+      "description": "Override default phase routing",
+      "properties": {
+        "probe": { "type": "string" },
+        "grasp": { "type": "string" },
+        "tangle": { "type": "string" },
+        "ink": { "type": "string" }
+      }
+    }
+  }
+}
