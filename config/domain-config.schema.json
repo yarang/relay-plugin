@@ -11,7 +11,7 @@
     "active_packs": {
       "type": "array",
       "items": { "type": "string" },
-      "description": "Active capability packs"
+      "description": "Active domain packs"
     },
     "project_name": {
       "type": "string",

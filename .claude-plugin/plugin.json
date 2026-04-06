@@ -13,6 +13,8 @@
     "./.claude/commands/setup.md",
     "./.claude/commands/setup-keys.md",
     "./.claude/commands/define-expert.md",
+    "./.claude/commands/define-executor.md",
+    "./.claude/commands/define-agent.md",
     "./.claude/commands/build-team.md",
     "./.claude/commands/invoke-agent.md",
     "./.claude/commands/visualize-team.md",

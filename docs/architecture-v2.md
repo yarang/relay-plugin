@@ -136,7 +136,7 @@ alias: codex_gpt_5.4     ← 이 executor를 그대로 사용
 | `model` | ✅ (alias 제외) | 모델 ID |
 | `fallback` | — | 실패 시 사용할 다른 Executor slug |
 | `auth.pool` | — | 사용할 key alias 목록 (`keys.json` 참조) |
-| `auth.strategy` | — | `round_robin` \| `fallback` \| `random` |
+| `auth.strategy` | — | `round_robin` \| `fallback` \| `random`. 기본값: `fallback` |
 | `alias` | — | 다른 Executor slug를 포인팅 (alias 전용) |
 
 **auth.strategy 의미**
@@ -230,7 +230,7 @@ Expert를 직접 실행하는 경로는 존재하지 않습니다.
     { "agent": "backend-dev-budget", "role": "Junior Backend",    "is_leader": false, "is_bridge": false }
   ],
   "phase_routing": {
-    "probe":  "gemini",
+    "probe":  "gemini_flash",
     "grasp":  "codex_gpt_5.4",
     "tangle": "codex_gpt_5.4",
     "ink":    "zai_glm_4_air"

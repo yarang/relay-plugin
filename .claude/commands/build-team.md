@@ -21,20 +21,21 @@
 > [1] claude — 고품질 의사결정 (기본값)
 > [2] glm    — 저비용 대량 처리
 
-### 4. 전문가 목록 표시
+### 4. Agent 목록 표시
 
-`.claude/relay/experts/` 디렉토리의 전문가 파일을 읽어 아래 형식으로 표시합니다.
+`.claude/relay/agents/` 디렉토리의 Agent 파일을 읽어 아래 형식으로 표시합니다.
+Agent 파일이 없으면 Expert 파일 목록으로 fallback (마이그레이션 호환).
 
 ```text
-사용 가능한 전문가:
-  1. SNS 마케터 (sns-marketer)
-     CLI: gemini-fast | 모델: gemini-3-flash-preview | Tier: trivial | Specs: 2
+사용 가능한 Agent:
+  1. backend-dev          (expert: backend-developer)
+     Executor: codex_gpt_5.4 | CLI: codex | Model: gpt-5.4 | Phases: tangle, ink
 
-  2. 백엔드 개발자 (backend-dev)
-     CLI: codex | 모델: gpt-5.3-codex | Tier: premium | Specs: 5
+  2. backend-dev-budget   (expert: backend-developer)
+     Executor: zai_glm_4_air  | CLI: zai   | Model: glm-4-air | Phases: tangle
 
-  3. 데이터 분석가 (data-analyst)
-     CLI: gemini | 모델: gemini-3-pro-preview | Tier: standard | Specs: 0
+  3. data-analyst         (expert: data-analyst)
+     Executor: gemini_flash_3  | CLI: gemini-fast | Model: gemini-3-flash | Phases: probe, grasp
 ```
 
 ### 5. 팀원 선택
@@ -92,17 +93,22 @@
 
 ### 검증 4 — CLI 가용성
 
-멤버의 `cli`가 `setup-keys.md` 에서 설정된 키 목록에 없으면 **경고**.
-`fallback_cli`가 있으면 자동 대체, 없으면 수동 변경 요청.
+멤버의 Agent → Executor → cli 체인을 따라 CLI 가용성을 확인합니다.
+`member.agent` → `agents/{slug}.md` → `execute_by` → `executors/{slug}.md` → `cli`.
+Executor의 `fallback`이 있으면 자동 대체, 없으면 수동 변경 요청.
+마이그레이션 호환: Agent 없이 Expert의 `backed_by`를 직접 사용하는 경우도 검증합니다.
 
 ### 검증 5 — Phase 커버리지
 
 모든 Phase(probe/grasp/tangle/ink) 에 최소 1명이 배정되어야 합니다.
 미배정 Phase가 있으면 **경고**.
 
-### 검증 6 — Tier 분산
+### 검증 6 — 비용 집중도
 
-premium 비율이 전체의 50% 초과 시 **경고** (비용 과다).
+팀 내 Executor의 모델 분포를 분석합니다.
+고비용 모델(flagship/reasoning급)이 전체의 50% 초과 시 **경고** (비용 과다).
+저비용 모델(mini/flash/zai급) 없이 전원 고비용 모델 사용 시 **경고**.
+`tier` 필드는 v0.6.0에서 제거됩니다 — Executor의 `model`로 비용 추론합니다.
 
 ## 팀 유형
 
@@ -130,32 +136,26 @@ premium 비율이 전체의 50% 초과 시 **경고** (비용 과다).
   "decision_mode": "leader_decides | consensus | vote | architect_veto",
   "members": [
     {
-      "role": "{역할명}",
-      "expert_slug": "{전문가 slug}",
-      "cli": "{cli_variant}",
-      "model": "{model_id}",
-      "fallback_cli": "{cli_variant 또는 null}",
-      "tier": "{trivial | standard | premium}",
-      "permission_mode": "{plan | acceptEdits | default}",
-      "memory": "{project | user | local}",
-      "isolation": "{worktree | null}",
-      "phases": ["probe", "grasp", "tangle", "ink"],
+      "agent": "{agent-slug}",
+      "role": "{팀 내 표시 역할명}",
       "is_leader": false,
       "is_bridge": false
     }
   ],
   "phase_routing": {
-    "probe": "{cli}",
-    "grasp": "{cli}",
-    "tangle": "{cli}",
-    "ink": "{cli}"
+    "probe": "{executor-slug}",
+    "grasp": "{executor-slug}",
+    "tangle": "{executor-slug}",
+    "ink": "{executor-slug}"
   },
   "bridge_to": "{상위팀 slug 또는 null}",
   "created_at": "{YYYY-MM-DD}"
 }
 ```
 
-각 멤버의 `cli`, `model`, `fallback_cli`, `tier`, `permission_mode`, `phases` 값은 전문가 정의 파일에서 자동으로 읽어옵니다.
+멤버는 `agent` slug만 참조합니다. 실행 속성(cli, model, permission 등)은 Agent/Executor 파일에서 읽습니다.
+`phase_routing` 값은 Executor slug를 사용합니다.
+마이그레이션 호환: Agent 파일 없이 Expert의 `backed_by`를 직접 사용하는 멤버는 `expert_slug` 필드로 저장됩니다.
 
 ## 완료 후
 
