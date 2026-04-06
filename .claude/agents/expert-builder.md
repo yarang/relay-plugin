@@ -85,7 +85,7 @@ permission_mode: {plan | acceptEdits | default}
 memory: {project | user | local}
 isolation: {worktree | null}
 phases: [probe, grasp, tangle, ink]
-capabilities: []
+specs: []
 created_at: {YYYY-MM-DD}
 ---
 

@@ -136,7 +136,7 @@ permission_mode: {plan | acceptEdits | default}  # 도구 권한
 memory: {project | user | local}      # 컨텍스트 범위
 isolation: {worktree | null}          # git worktree 격리
 phases: [probe, grasp, tangle, ink]   # 담당 phase
-capabilities: []                       # 역량 태그
+specs: []                              # 역량 태그
 created_at: {YYYY-MM-DD}
 ---
 
