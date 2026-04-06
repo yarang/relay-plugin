@@ -1,39 +1,4 @@
-# Git ignore
-
-# relay-plugin — 저장소 루트의 .claude/ 만 무시 (relay-plugin/.claude/ 는 플러그인 콘텐츠)
-/.claude/
-agent-library/
-*.DS_Store
+.DS_Store
+.claude/.DS_Store
 *.pyc
 __pycache__/
-.ruff_cache/
-
-# MCP servers - API keys (credentials)
-mcp-servers/**/credentials.json
-.mcp.json
-.env
-*.env.local
-
-# IDE
-.idea
-.vscode/
-
-# Build artifacts
-dist/
-build/
-*.egg-info/
-
-# Logs
-*.log
-logs/
-
-# Runtime data
-*.pid
-*.pyc
-
-# Secrets ( credentials files
-*_credentials.json
-*.pem
-*.env
-.env.local
-.agent_forge_for_zai.json
