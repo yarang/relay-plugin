@@ -214,7 +214,7 @@ created_at: 2026-03-28
 ```text
 1. expert 파일 또는 definition 파일 로드
 2. base 로드
-3. capabilities 로드 (requires 체인 포함)
+3. specs 로드 (requires 체인 포함)
 4. 선택된 platform 로드
 5. policy 로드  ← 이 시점에서 충돌 항목은 policy가 덮어씀
 6. task overlay 결합  ← 이번 실행 전용 지시사항 추가
